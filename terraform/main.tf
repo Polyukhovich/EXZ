@@ -44,7 +44,7 @@ resource "aws_security_group" "app" {
   }
 
   tags= {
-    Name = "web_app"
+    Name = "app"
   }
 }
 
@@ -65,7 +65,7 @@ resource "aws_instance" "web_instance" {
   EOF
 
   tags = {
-    Name = "webapp_instance"
+    Name = "app_instance"
   }
 }
 
