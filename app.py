@@ -12,7 +12,7 @@ def determine_quarter(date_str):
 
         
         if 1 <= month <= 3:
-            return f"Дата {date_str} відноситься до 1-го кварталу."
+            return f"*Дата {date_str} відноситься до 1-го кварталу*."
         elif 4 <= month <= 6:
             return f"Дата {date_str} відноситься до 2-го кварталу."
         elif 7 <= month <= 9:
