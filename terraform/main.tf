@@ -14,18 +14,14 @@ terraform {
   }
 }
 
+# Configure the AWS provider
 provider "aws" {
-  region = "us-east-1"
+  region     = "us-east-1"
 }
 
-resource "random_id" "unique_id" {
-  byte_length = 8
-}
-
-resource "aws_security_group" "app" {
-  name        = "web_app-${random_id.unique_id.hex}"
+resource "aws_security_group" "web_app" {
+  name        = "web_app"
   description = "security group"
-  
   ingress {
     from_port   = 80
     to_port     = 80
@@ -33,13 +29,12 @@ resource "aws_security_group" "app" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
+ ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
   egress {
     from_port   = 0
     to_port     = 65535
@@ -47,16 +42,15 @@ resource "aws_security_group" "app" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "app"
+  tags= {
+    Name = "web_app"
   }
 }
 
 resource "aws_instance" "web_instance" {
   ami           = "ami-0866a3c8686eaeeba"
   instance_type = "t3.micro"
-  
-  security_groups = [aws_security_group.app.id]  
+  security_groups = ["web_app"]
 
   user_data = <<-EOF
   #!/bin/bash
@@ -67,12 +61,15 @@ resource "aws_instance" "web_instance" {
   newgrp docker
   docker pull andriypolyuh/exz:latest
   docker run -it andriypolyuh/exz:latest
+
   EOF
 
+
   tags = {
-    Name = "app_instance"
+    Name = "webapp_instance"
   }
 }
+
 
 output "instance_public_ip" {
   value     = aws_instance.web_instance.public_ip
