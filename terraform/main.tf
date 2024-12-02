@@ -20,8 +20,8 @@ provider "aws" {
   region     = "us-east-1"
 }
 
-resource "aws_security_group" "web_app" {
-  name        = "web_app"
+resource "aws_security_group" "app" {
+  name        = "app"
   description = "security group"
   ingress {
     from_port   = 80
