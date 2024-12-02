@@ -6,23 +6,26 @@ terraform {
       version = "~> 5.0"
     }
   }
-backend "s3" {
-    bucket = "exz1"
-    key = "terraform.tfstate"
-    region = "us-east-1"
-    dynamodb_table = "exz1-lockID" 
-
+  backend "s3" {
+    bucket         = "exz1"
+    key            = "terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "exz1-lockID"
   }
 }
 
-# Configure the AWS provider
 provider "aws" {
-  region     = "us-east-1"
+  region = "us-east-1"
+}
+
+resource "random_id" "unique_id" {
+  byte_length = 8
 }
 
 resource "aws_security_group" "app" {
-  name        = "web_app"
+  name        = "web_app-${random_id.unique_id.hex}"
   description = "security group"
+  
   ingress {
     from_port   = 80
     to_port     = 80
@@ -30,12 +33,13 @@ resource "aws_security_group" "app" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
- ingress {
+  ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
   egress {
     from_port   = 0
     to_port     = 65535
@@ -43,7 +47,7 @@ resource "aws_security_group" "app" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags= {
+  tags = {
     Name = "app"
   }
 }
@@ -51,7 +55,9 @@ resource "aws_security_group" "app" {
 resource "aws_instance" "web_instance" {
   ami           = "ami-0866a3c8686eaeeba"
   instance_type = "t3.micro"
-  security_groups = ["app"]
+  
+  security_groups = [aws_security_group.app.id]
+  
   user_data = <<-EOF
   #!/bin/bash
   curl -fsSL https://get.docker.com -o get-docker.sh
@@ -59,16 +65,14 @@ resource "aws_instance" "web_instance" {
   sudo groupadd docker
   sudo usermod -aG docker $USER
   newgrp docker
-  docker pull  andriypolyuh/exz:latest
+  docker pull andriypolyuh/exz:latest
   docker run -it andriypolyuh/exz:latest
-
   EOF
 
   tags = {
     Name = "app_instance"
   }
 }
-
 
 output "instance_public_ip" {
   value     = aws_instance.web_instance.public_ip
