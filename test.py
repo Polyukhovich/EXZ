@@ -1,7 +1,7 @@
 import unittest
 from io import StringIO
 import sys
-from datetime import datetime
+from app import datetime
 
 def determine_quarter(date_str):
     try:
