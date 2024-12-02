@@ -6,11 +6,12 @@ terraform {
       version = "~> 5.0"
     }
   }
-  backend "s3" {
-    bucket         = "exz1"
-    key            = "terraform.tfstate"
-    region         = "us-east-1"
+backend "s3" {
+    bucket = "exz1"
+    key = "terraform.tfstate"
+    region = "us-east-1"
     dynamodb_table = "exz1-lockID"
+
   }
 }
 
@@ -59,7 +60,7 @@ resource "aws_instance" "web_instance" {
   sudo groupadd docker
   sudo usermod -aG docker $USER
   newgrp docker
-  docker pull andriypolyuh/exz:latest
+  docker pull  andriypolyuh/exz:latest
   docker run -it andriypolyuh/exz:latest
 
   EOF
