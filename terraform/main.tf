@@ -7,10 +7,10 @@ terraform {
     }
   }
 backend "s3" {
-    bucket = "lab67-my-tf-state"
+    bucket = "exz1"
     key = "terraform.tfstate"
     region = "us-east-1"
-    dynamodb_table = "lab67-my-tf-lockid" 
+    dynamodb_table = "exz1-lockID" 
 
   }
 }
@@ -20,7 +20,7 @@ provider "aws" {
   region     = "us-east-1"
 }
 
-resource "aws_security_group" "web_app" {
+resource "aws_security_group" "app" {
   name        = "web_app"
   description = "security group"
   ingress {
@@ -49,25 +49,19 @@ resource "aws_security_group" "web_app" {
 }
 
 resource "aws_instance" "web_instance" {
-  ami           = "ami-0166fe664262f664c"
-  instance_type = "t2.micro"
-  security_groups = ["web_app"]
- user_data = <<-EOF
+  ami           = "ami-0866a3c8686eaeeba"
+  instance_type = "t3.micro"
+  security_groups = ["app"]
+  user_data = <<-EOF
   #!/bin/bash
-  # Встановлення Docker
   curl -fsSL https://get.docker.com -o get-docker.sh
   sudo sh get-docker.sh
-  sudo usermod -aG docker ec2-user  # Додавання користувача ec2-user в групу docker
-
-  # Перезавантаження групи для користувача
+  sudo groupadd docker
+  sudo usermod -aG docker $USER
   newgrp docker
+  docker pull  andriypolyuh/exz:latest
+  docker run -it andriypolyuh/exz:latest
 
-  # Завантаження і запуск контейнера
-  docker pull andriypolyuh/aws:latest
-  docker run -id -p 8088:8088 andriypolyuh/aws:latest
-
-  # Перевірка, чи запущено Docker
-  docker ps
   EOF
 
   tags = {
